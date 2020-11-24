@@ -5,3 +5,5 @@ import { GlueCdkStack } from '../lib/glue-cdk-stack';
 
 const app = new cdk.App();
 new GlueCdkStack(app, 'GlueCdkStack');
+
+app.synth()
