@@ -1,9 +1,9 @@
 import path = require('path')
-import * as cdk from '@aws-cdk/core';
 
+import * as cdk from '@aws-cdk/core';
 import * as glue from '@aws-cdk/aws-glue';
 import { CfnCrawler, CfnJob, Schema } from '@aws-cdk/aws-glue';
-import { stringLike } from '@aws-cdk/assert';
+import { PolicyStatement, Role, ServicePrincipal } from '@aws-cdk/aws-iam'
 
 export class GlueCdkStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -30,6 +30,14 @@ export class GlueCdkStack extends cdk.Stack {
       dataFormat: glue.DataFormat.JSON
     })
 
+    const role = new Role(this, 'rp-test-role', {
+      assumedBy: new ServicePrincipal('glue.amazonaws.com') 
+    })
+    role.addToPolicy(new PolicyStatement({
+      resources: ['*'],
+      actions: ['glue:*']
+    }))
+
     new glue.CfnJob(this, 'rp-glue-job', {
       command: {
         name: "rp-glue-test-command-name"
@@ -38,7 +46,7 @@ export class GlueCdkStack extends cdk.Stack {
     })
 
     new CfnCrawler(this, 'rp-glue-test-crawler', {
-      role: 'rp-glue-test-crawler-role',
+      role: 'rp-glue-test-role',
       targets: {}
     })
   }
