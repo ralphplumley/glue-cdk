@@ -30,23 +30,23 @@ export class GlueCdkStack extends cdk.Stack {
       dataFormat: glue.DataFormat.JSON
     })
 
-    const role = new Role(this, 'rp-test-role', {
+    const role = new Role(this, 'rp-glue-test-role', {
       assumedBy: new ServicePrincipal('glue.amazonaws.com') 
     })
     role.addToPolicy(new PolicyStatement({
-      resources: ['*'],
-      actions: ['glue:*']
+      resources: ["*"],
+      actions: ["glue:*"],
     }))
 
     new glue.CfnJob(this, 'rp-glue-job', {
       command: {
         name: "rp-glue-test-command-name"
       },
-      role: 'rp-glue-test-role'
+      role: role.roleArn
     })
 
     new CfnCrawler(this, 'rp-glue-test-crawler', {
-      role: 'rp-glue-test-role',
+      role: role.roleArn,
       targets: {}
     })
   }
