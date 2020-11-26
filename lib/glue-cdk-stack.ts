@@ -12,13 +12,13 @@ export class GlueCdkStack extends cdk.Stack {
 
     super(scope, id, props)
     
-    const myDb = new glue.Database(this, 'rp-test-db', {
-      databaseName: 'rp-test-db'
+    const myDb = new glue.Database(this, 'rp-glue-test-db', {
+      databaseName: 'rp-glue-test-db'
     })
 
-    new glue.Table(this, 'rp-MyTable', {
+    const table = new glue.Table(this, 'rp-glue-test-table', {
       database: myDb,
-      tableName: 'rp-test-table',
+      tableName: 'rp-glue-test-table',
       columns: [{
         name: 'col1',
         type: glue.Schema.STRING,
@@ -38,7 +38,7 @@ export class GlueCdkStack extends cdk.Stack {
       actions: ["glue:*"],
     }))
 
-    new glue.CfnJob(this, 'rp-glue-job', {
+    new glue.CfnJob(this, 'rp-glue-test-job', {
       command: {
         name: "rp-glue-test-command-name"
       },
@@ -47,7 +47,15 @@ export class GlueCdkStack extends cdk.Stack {
 
     new CfnCrawler(this, 'rp-glue-test-crawler', {
       role: role.roleArn,
-      targets: {}
+      schemaChangePolicy: {
+        deleteBehavior: 'LOG'
+      },
+      targets: {
+        catalogTargets: [{ 
+          databaseName: myDb.databaseName,
+          tables: [table.tableName]
+        }]
+      }
     })
   }
 }
